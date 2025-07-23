@@ -1,3 +1,5 @@
 .venv/
 .env
 __pycache__/
+calendar_credentials/
+calendar_retriever.py

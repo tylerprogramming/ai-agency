@@ -1,0 +1,22 @@
+intent_task:
+  description: >
+    Understand the user's intent from the message: {message} and provide a detailed response
+  expected_output: >
+    Return the intent of the user's message.
+
+    The following are the tools you can use to accomplish the user's intent:
+    - AddEventTool
+    - DeleteEventTool
+    - UpdateEventTool
+    - SelectEventsTool
+  agent: intent_agent
+
+calendar_task:
+  description: >
+    Return the calendar data based on the user's intent.  So if they want to add an event, you will need to know the event details.
+  expected_output: >
+    Return the calendar data based on the user's intent.  So if they want to add an event, you will need to know the event details.
+    Same for deleting or updating an event or listing events.  Just make it short and sweet what you accomplished.
+
+    Even if you have all the details for the event, make it shorter.  Only provide the event, not all the details are necessary.
+  agent: calendar_agent

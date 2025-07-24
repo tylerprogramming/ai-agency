@@ -7,3 +7,7 @@ google-api-python-client
 openai
 crewai
 crewai-tools
+apscheduler
+pytz
+requests
+email-validator

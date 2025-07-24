@@ -8,10 +8,21 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
+    host: '0.0.0.0',
+    port: 3000,
     proxy: {
-      '/api': 'http://localhost:8000',
-      '/auth': 'http://localhost:8000',
-      '/calendar': 'http://localhost:8000',
+      '/api': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+      },
+      '/calendar': {
+        target: 'http://backend:8000',
+        changeOrigin: true,
+      },
     },
   },
 });

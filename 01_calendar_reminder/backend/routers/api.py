@@ -15,35 +15,6 @@ from ..config.settings import settings, Settings
 
 router = APIRouter(prefix="/api", tags=["api"])
 
-
-@router.get("/config/env-info")
-def get_env_info():
-    """Get information about the .env file location and status"""
-    import os
-    env_path = Settings.get_env_file_path()
-    abs_path = os.path.abspath(env_path)
-    exists = Settings.env_file_exists()
-    
-    return {
-        "env_file_path": abs_path,
-        "env_file_exists": exists,
-        "project_root": os.path.dirname(abs_path),
-        "instructions": {
-            "step_1": f"Create a file called '.env' in: {os.path.dirname(abs_path)}",
-            "step_2": "Add your API keys and configuration to the .env file",
-            "example_content": """# API Keys
-OPENAI_API_KEY=your_openai_api_key_here
-SERPER_API_KEY=your_serper_api_key_here
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
-
-# Optional Settings
-DEBUG=false
-HOST=localhost
-PORT=8000"""
-        }
-    }
-
-
 @router.post("/chat/stream", response_model=ChatResponse)
 async def chat_stream(request: ChatRequest):
     """Chat with calendar assistant"""
@@ -214,7 +185,6 @@ def get_reminder_status():
             error=str(e)
         )
 
-
 @router.delete("/cancel-daily-reminder")
 def cancel_daily_reminder():
     """Cancel daily reminder"""
@@ -225,7 +195,6 @@ def cancel_daily_reminder():
     except Exception as e:
         print(f"Error cancelling reminder: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post("/test-schedule", response_model=TestScheduleResponse)
 async def test_schedule(request: TestScheduleRequest):

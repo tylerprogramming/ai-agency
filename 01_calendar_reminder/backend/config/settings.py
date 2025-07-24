@@ -11,10 +11,10 @@ class Settings(BaseSettings):
     # Server Configuration
     host: str = "localhost"
     port: int = 8000
-    frontend_url: str = "http://localhost:5173"
+    frontend_url: str = "http://localhost:3000"
     
     # CORS Configuration
-    cors_origins: List[str] = ["http://localhost:5173"]
+    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:5173"]
     cors_allow_credentials: bool = True
     cors_allow_methods: List[str] = ["*"]
     cors_allow_headers: List[str] = ["*"]

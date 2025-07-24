@@ -40,6 +40,78 @@ docker compose restart
 docker compose build --no-cache
 ```
 
+## 🔐 Google Calendar Credentials Setup
+
+Before using the application, you need to set up Google Calendar API credentials:
+
+### 1. Create a Google Cloud Project
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Click **"Select a project"** → **"New Project"**
+3. Enter a project name (e.g., "Calendar Assistant")
+4. Click **"Create"**
+
+### 2. Enable Google Calendar API
+
+1. In your project, go to **APIs & Services** → **Library**
+2. Search for **"Google Calendar API"**
+3. Click on it and press **"Enable"**
+
+### 3. Create OAuth 2.0 Credentials
+
+1. Go to **APIs & Services** → **Credentials**
+2. Click **"+ CREATE CREDENTIALS"** → **"OAuth client ID"**
+3. If prompted, configure the OAuth consent screen:
+   - Choose **"External"** user type
+   - Fill in required fields (App name, User support email, Developer email)
+   - Add your email to test users
+   - Save and continue through all steps
+
+4. For the OAuth client ID:
+   - **Application type**: Select **"Desktop application"**
+   - **Name**: Enter a name (e.g., "Calendar Assistant Desktop")
+   - Click **"Create"**
+
+### 4. Download and Save Credentials
+
+1. After creating the OAuth client, click the **download button** (⬇️) next to your credential
+2. This downloads a JSON file (usually named like `client_secret_xxxxx.json`)
+3. **Important**: Rename this file to exactly `client_secrets.json`
+4. Place the file in the `calendar_credentials/` folder in your project:
+   ```
+   01_calendar_reminder/
+   ├── calendar_credentials/
+   │   └── client_secrets.json  ← Your downloaded credentials file
+   ```
+
+### 5. Configure Authorized Redirect URIs
+
+1. Back in Google Cloud Console, click on your OAuth client ID to edit it
+2. In the **"Authorized redirect URIs"** section, add:
+   ```
+   http://localhost:8000/auth/callback
+   ```
+3. Click **"Save"**
+
+### ✅ Verification
+
+Your `calendar_credentials/client_secrets.json` should look something like this:
+```json
+{
+  "installed": {
+    "client_id": "your-client-id.googleusercontent.com",
+    "project_id": "your-project-id",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret": "your-client-secret",
+    "redirect_uris": ["http://localhost"]
+  }
+}
+```
+
+> **Note**: Keep this file secure and never commit it to version control!
+
 ## 🛠️ Manual Setup (Alternative)
 
 If you prefer not to use Docker:

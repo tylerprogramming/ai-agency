@@ -12,7 +12,7 @@ An AI-powered Google Calendar management application with a React frontend and F
 1. **Add your API keys**:
    - Open `env.example` file
    - Replace `your_openai_api_key_here` with your actual [OpenAI API key](https://platform.openai.com/api-keys)
-   - Replace `your_serper_api_key_here` with your [Serper API key](https://serper.dev/)
+   - Add Google Credentials (details below)
    - (Optional) Add your Telegram bot token for reminders
 
 2. **Run the startup script**:

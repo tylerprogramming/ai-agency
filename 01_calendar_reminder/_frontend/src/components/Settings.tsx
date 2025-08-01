@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Copy, Check, X, Save, Eye, EyeOff, Send, TestTube } from 'lucide-react';
 
 interface SettingsProps {
@@ -28,7 +28,7 @@ export const Settings: React.FC<SettingsProps> = ({
   const [tokenDraft, setTokenDraft] = useState(telegramToken);
   const [showToken, setShowToken] = useState(false);
 
-  // Daily Schedule Time state
+  // Daily Schedule Time state - Initialize with defaults but will be overridden by server status
   const [scheduleHour, setScheduleHour] = useState(() => parseInt(localStorage.getItem('schedule_hour') || '9'));
   const [scheduleMinute, setScheduleMinute] = useState(() => parseInt(localStorage.getItem('schedule_minute') || '0'));
   const [scheduleEnabled, setScheduleEnabled] = useState(() => localStorage.getItem('schedule_enabled') === 'true');
@@ -39,7 +39,45 @@ export const Settings: React.FC<SettingsProps> = ({
   const [openaiDraft, setOpenaiDraft] = useState(openaiKey);
   const [showOpenai, setShowOpenai] = useState(false);
 
+  const [testingTelegram, setTestingTelegram] = useState(false);
+  const [sendingDaily, setSendingDaily] = useState(false);
+  const [reminderStatus, setReminderStatus] = useState<{scheduled: boolean, next_run?: string, enabled?: boolean, hour?: number, minute?: number} | null>(null);
+  const [testingSchedule, setTestingSchedule] = useState(false);
+  const [loadingReminderStatus, setLoadingReminderStatus] = useState(true);
+
   const currentOrigin = window.location.origin;
+
+  // Fetch current reminder status on component mount
+  useEffect(() => {
+    const fetchReminderStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/reminder-status');
+        if (response.ok) {
+          const status = await response.json();
+          console.log('Loaded reminder status:', status);
+          
+          // Update state with server data if available
+          if (status.scheduled && status.enabled) {
+            setReminderStatus(status);
+            setScheduleEnabled(status.enabled);
+            if (status.hour !== undefined) setScheduleHour(status.hour);
+            if (status.minute !== undefined) setScheduleMinute(status.minute);
+            
+            // Update localStorage to match server state
+            localStorage.setItem('schedule_enabled', status.enabled.toString());
+            localStorage.setItem('schedule_hour', status.hour?.toString() || '9');
+            localStorage.setItem('schedule_minute', status.minute?.toString() || '0');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching reminder status:', error);
+      } finally {
+        setLoadingReminderStatus(false);
+      }
+    };
+
+    fetchReminderStatus();
+  }, []);
 
   const handleClientIdChange = (value: string) => {
     setClientId(value);
@@ -144,7 +182,10 @@ export const Settings: React.FC<SettingsProps> = ({
         console.log('Schedule updated:', result);
         setReminderStatus({
           scheduled: result.enabled,
-          next_run: result.next_run
+          next_run: result.next_run,
+          enabled: result.enabled,
+          hour: scheduleHour,
+          minute: scheduleMinute
         });
       } else {
         console.error('Failed to update schedule');
@@ -153,10 +194,6 @@ export const Settings: React.FC<SettingsProps> = ({
       console.error('Error updating schedule:', error);
     }
   };
-
-  const [testingTelegram, setTestingTelegram] = useState(false);
-  const [sendingDaily, setSendingDaily] = useState(false);
-  const [reminderStatus, setReminderStatus] = useState<{scheduled: boolean, next_run?: string} | null>(null);
 
   const testTelegramConnection = async () => {
     if (!telegramToken || !telegramId) {
@@ -218,8 +255,6 @@ export const Settings: React.FC<SettingsProps> = ({
       setSendingDaily(false);
     }
   };
-
-  const [testingSchedule, setTestingSchedule] = useState(false);
 
   const testScheduler = async () => {
     if (!telegramToken || !telegramId) {
@@ -482,117 +517,126 @@ export const Settings: React.FC<SettingsProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-4">
                 Daily Schedule Settings
               </label>
-              <div className="space-y-4 bg-gray-50 p-4 rounded-lg border">
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    id="schedule-enabled"
-                    checked={scheduleEnabled}
-                    onChange={(e) => {
-                      setScheduleEnabled(e.target.checked);
-                      handleScheduleChange();
-                    }}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="schedule-enabled" className="text-sm font-medium text-gray-700">
-                    Enable daily calendar reminder
-                  </label>
-                </div>
-                
-                {scheduleEnabled && (
-                  <div className="flex items-center space-x-4">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Hour (24h format)</label>
-                      <select
-                        value={scheduleHour}
-                        onChange={(e) => {
-                          setScheduleHour(parseInt(e.target.value));
-                          handleScheduleChange();
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                      >
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <option key={i} value={i}>
-                            {i.toString().padStart(2, '0')}:00
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Minutes</label>
-                      <select
-                        value={scheduleMinute}
-                        onChange={(e) => {
-                          setScheduleMinute(parseInt(e.target.value));
-                          handleScheduleChange();
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                      >
-                        {[0, 15, 30, 45].map(minute => (
-                          <option key={minute} value={minute}>
-                            :{minute.toString().padStart(2, '0')}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+              {loadingReminderStatus ? (
+                <div className="space-y-4 bg-gray-50 p-4 rounded-lg border">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    <span className="text-sm text-gray-600">Loading current settings...</span>
                   </div>
-                )}
-                
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-500">
-                    {scheduleEnabled 
-                      ? `Daily reminder will be sent at ${scheduleHour.toString().padStart(2, '0')}:${scheduleMinute.toString().padStart(2, '0')} Eastern Time`
-                      : 'Daily reminders are disabled'
-                    }
-                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4 bg-gray-50 p-4 rounded-lg border">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="schedule-enabled"
+                      checked={scheduleEnabled}
+                      onChange={(e) => {
+                        setScheduleEnabled(e.target.checked);
+                        handleScheduleChange();
+                      }}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="schedule-enabled" className="text-sm font-medium text-gray-700">
+                      Enable daily calendar reminder
+                    </label>
+                  </div>
                   
-                  {reminderStatus && reminderStatus.scheduled && (
-                    <div className="flex items-center space-x-2 text-xs">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-green-700 font-medium">
-                        Scheduled! Next reminder: {new Date(reminderStatus.next_run || '').toLocaleString()}
-                      </span>
+                  {scheduleEnabled && (
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Hour (24h format)</label>
+                        <select
+                          value={scheduleHour}
+                          onChange={(e) => {
+                            setScheduleHour(parseInt(e.target.value));
+                            handleScheduleChange();
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        >
+                          {Array.from({ length: 24 }, (_, i) => (
+                            <option key={i} value={i}>
+                              {i.toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Minutes</label>
+                        <select
+                          value={scheduleMinute}
+                          onChange={(e) => {
+                            setScheduleMinute(parseInt(e.target.value));
+                            handleScheduleChange();
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        >
+                          {[0, 15, 30, 45].map(minute => (
+                            <option key={minute} value={minute}>
+                              :{minute.toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   )}
                   
-                  {scheduleEnabled && telegramToken && telegramId && !reminderStatus?.scheduled && (
-                    <div className="flex items-center space-x-2 text-xs">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-yellow-700">Setting up reminder...</span>
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500">
+                      {scheduleEnabled 
+                        ? `Daily reminder will be sent at ${scheduleHour.toString().padStart(2, '0')}:${scheduleMinute.toString().padStart(2, '0')} Eastern Time`
+                        : 'Daily reminders are disabled'
+                      }
+                    </p>
+                    
+                    {reminderStatus && reminderStatus.scheduled && reminderStatus.next_run && (
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-green-700 font-medium">
+                          Scheduled! Next reminder: {new Date(reminderStatus.next_run).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {scheduleEnabled && telegramToken && telegramId && !reminderStatus?.scheduled && (
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="text-yellow-700">Setting up reminder...</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Test Buttons */}
+                  {telegramToken && telegramId && (
+                    <div className="flex space-x-3 pt-2 border-t border-gray-200">
+                      <button
+                        onClick={testTelegramConnection}
+                        disabled={testingTelegram}
+                        className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                      >
+                        <TestTube size={16} className={testingTelegram ? 'animate-pulse' : ''} />
+                        <span>{testingTelegram ? 'Testing...' : 'Test Connection'}</span>
+                      </button>
+                      <button
+                        onClick={sendDailySchedule}
+                        disabled={sendingDaily}
+                        className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                      >
+                        <Send size={16} className={sendingDaily ? 'animate-pulse' : ''} />
+                        <span>{sendingDaily ? 'Sending...' : 'Send Today\'s Schedule'}</span>
+                      </button>
+                      <button
+                        onClick={testScheduler}
+                        disabled={testingSchedule}
+                        className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                      >
+                        <TestTube size={16} className={testingSchedule ? 'animate-pulse' : ''} />
+                        <span>{testingSchedule ? 'Scheduling...' : 'Test in 1 min'}</span>
+                      </button>
                     </div>
                   )}
                 </div>
-                
-                {/* Test Buttons */}
-                {telegramToken && telegramId && (
-                  <div className="flex space-x-3 pt-2 border-t border-gray-200">
-                    <button
-                      onClick={testTelegramConnection}
-                      disabled={testingTelegram}
-                      className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-3 py-2 rounded-lg transition-colors text-sm"
-                    >
-                      <TestTube size={16} className={testingTelegram ? 'animate-pulse' : ''} />
-                      <span>{testingTelegram ? 'Testing...' : 'Test Connection'}</span>
-                    </button>
-                    <button
-                      onClick={sendDailySchedule}
-                      disabled={sendingDaily}
-                      className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-3 py-2 rounded-lg transition-colors text-sm"
-                    >
-                      <Send size={16} className={sendingDaily ? 'animate-pulse' : ''} />
-                      <span>{sendingDaily ? 'Sending...' : 'Send Today\'s Schedule'}</span>
-                    </button>
-                    <button
-                      onClick={testScheduler}
-                      disabled={testingSchedule}
-                      className="flex items-center space-x-2 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white px-3 py-2 rounded-lg transition-colors text-sm"
-                    >
-                      <TestTube size={16} className={testingSchedule ? 'animate-pulse' : ''} />
-                      <span>{testingSchedule ? 'Scheduling...' : 'Test in 1 min'}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             {/* OpenAI API Key */}

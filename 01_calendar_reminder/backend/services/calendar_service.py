@@ -19,20 +19,18 @@ class CalendarService:
         return build('calendar', 'v3', credentials=creds)
 
     def get_current_month_events(self) -> List[Dict[str, Any]]:
-        """Get events for the current month"""
+        """Get events from the past year to the future year"""
         service = self._get_service()
         
         now = datetime.utcnow()
-        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        if now.month == 12:
-            end_of_month = start_of_month.replace(year=now.year + 1, month=1) - timedelta(seconds=1)
-        else:
-            end_of_month = start_of_month.replace(month=now.month + 1) - timedelta(seconds=1)
+        # Get events from 1 year ago to 1 year in the future
+        start_time = (now - timedelta(days=365)).replace(hour=0, minute=0, second=0, microsecond=0)
+        end_time = (now + timedelta(days=365)).replace(hour=23, minute=59, second=59, microsecond=999999)
         
         events_result = service.events().list(
             calendarId='primary',
-            timeMin=start_of_month.isoformat() + 'Z',
-            timeMax=end_of_month.isoformat() + 'Z',
+            timeMin=start_time.isoformat() + 'Z',
+            timeMax=end_time.isoformat() + 'Z',
             maxResults=2500,
             singleEvents=True,
             orderBy='startTime'

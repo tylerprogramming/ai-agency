@@ -31,7 +31,7 @@ class VoiceAgent:
             self.config = config or VoiceAgentConfig.from_environment()
             self.config.validate()
         except Exception as e:
-            raise ConfigurationError(f"Configuration error: {e}")
+            raise Exception(f"Configuration error: {e}")
         
         # Initialize services
         self.search_service = SearchService(self.config)
@@ -71,7 +71,7 @@ class VoiceAgent:
         search_results = self.search_service.search_content(topic)
         
         if not search_results:
-            raise SearchError(f"No content found for topic: {topic}")
+            raise Exception(f"No content found for topic: {topic}")
         
         # Step 2: Generate newsletter article
         logger.info("Step 2: Generating newsletter article...")
@@ -86,7 +86,7 @@ class VoiceAgent:
             logger.info("Step 4: Sending via Telegram...")
             success = self.messaging_service.send_voice_message(audio_path)
             if not success:
-                raise MessagingError("Failed to send voice message via Telegram")
+                raise Exception("Failed to send voice message via Telegram")
         
         logger.info(f"Newsletter audio creation completed: {audio_path}")
         return audio_path

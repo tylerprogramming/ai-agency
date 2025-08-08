@@ -7,14 +7,13 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 from google_services.google_sheets_auth import GoogleSheetsAPI
-from models.sheet_model import Sheet, Cell, Spreadsheet
+from models.sheet_model import Sheet
 from database.logging_service import SupabaseLoggingService
 
-# Load environment variables
 load_dotenv()
 
 # Constants
-SPREADSHEET_ID = "1DRRKrG3cSnNYDl7iUzkmk6p52SI8s31er6m3rkFBLlQ"
+SPREADSHEET_ID = os.getenv("CALENDAR_SPREADSHEET_ID")
 MAX_COLUMNS = 40
 MAX_ROWS = 40
 

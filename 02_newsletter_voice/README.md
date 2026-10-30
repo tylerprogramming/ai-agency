@@ -45,44 +45,25 @@ AUDIO_FORMAT=mp3_44100_128
 
 ## Usage
 
-### Interactive Mode
 ```bash
 python main.py
 ```
 
-### Direct Topic Input
-```bash
-python main.py "AI agents and memory systems"
-```
-
-### With Options
-```bash
-# Don't send via Telegram
-python main.py --topic "blockchain technology" --no-telegram
-
-# Custom output filename
-python main.py "machine learning trends" --output ml_newsletter.mp3
-
-# Search only (no audio generation)
-python main.py "quantum computing" --search-only
-
-# Enable debug logging
-python main.py "data science" --debug
-```
+It asks for a topic, then searches, writes the article, generates the audio, saves it to `output/newsletter.mp3` and sends it to your Telegram chat. Run it from inside `02_newsletter_voice` so the local imports resolve.
 
 ## Architecture
 
 The application follows clean architecture principles with clear separation of concerns:
 
 ```
-02_voice_agent/
-├── main.py              # CLI interface and application entry point
+02_newsletter_voice/
+├── main.py              # Interactive CLI entry point
 ├── voice_agent.py       # Main application orchestrator
 ├── services.py          # Service classes for different responsibilities
 ├── config.py            # Configuration management
-├── exceptions.py        # Custom exception classes
 ├── telegram.py          # Telegram messaging utilities
 ├── requirements.txt     # Python dependencies
+├── output/              # Generated audio
 └── README.md           # This file
 ```
 
@@ -115,17 +96,7 @@ All configuration is managed through environment variables with sensible default
 
 ## Error Handling
 
-The application includes comprehensive error handling with custom exception types:
-
-- `ConfigurationError`: Issues with configuration or missing API keys
-- `SearchError`: Problems with content search or scraping
-- `ContentGenerationError`: AI content generation failures
-- `AudioGenerationError`: Text-to-speech conversion issues
-- `MessagingError`: Telegram delivery problems
-
-## Logging
-
-Logs are written to both console and `voice_agent.log` file. Use `--debug` flag for detailed logging.
+Missing required environment variables stop the run at startup with a `Configuration error` that lists every missing name. A failed search, article or audio step is logged and raised as an `Exception` with the step in the message. For Telegram, a network error stops the run, while an error response from the Telegram API is only printed. The audio file is saved before the Telegram step, so it stays in `output/` either way.
 
 ## API Keys Setup
 

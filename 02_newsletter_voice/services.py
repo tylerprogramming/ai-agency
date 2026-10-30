@@ -7,7 +7,7 @@ from elevenlabs import ElevenLabs, save
 from firecrawl import FirecrawlApp, ScrapeOptions
 from openai import OpenAI
 
-from .config import VoiceAgentConfig
+from config import VoiceAgentConfig
 
 logger = logging.getLogger(__name__)
 

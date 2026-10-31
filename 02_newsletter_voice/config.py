@@ -26,7 +26,7 @@ class VoiceAgentConfig:
     # Application Configuration
     search_limit: int = 5
     search_time_filter: str = "qdr:d"  # Last day
-    openai_model: str = "gpt-4.1"
+    openai_model: str = "gpt-6-luna"  # gpt-4.1 shuts down 2027-01-14
     elevenlabs_model: str = "eleven_multilingual_v2"
     audio_format: str = "mp3_44100_128"
     
@@ -62,7 +62,7 @@ class VoiceAgentConfig:
             telegram_chat_id=os.getenv("TELEGRAM_CHAT_ID", ""),
             search_limit=int(os.getenv("SEARCH_LIMIT", "5")),
             search_time_filter=os.getenv("SEARCH_TIME_FILTER", "qdr:d"),
-            openai_model=os.getenv("OPENAI_MODEL", "gpt-4.1"),
+            openai_model=os.getenv("OPENAI_MODEL", "gpt-6-luna"),
             elevenlabs_model=os.getenv("ELEVENLABS_MODEL", "eleven_multilingual_v2"),
             audio_format=os.getenv("AUDIO_FORMAT", "mp3_44100_128")
         )

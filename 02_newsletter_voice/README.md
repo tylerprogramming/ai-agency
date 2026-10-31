@@ -38,7 +38,7 @@ TELEGRAM_CHAT_ID=your_chat_id
 # Optional Configuration
 SEARCH_LIMIT=5
 SEARCH_TIME_FILTER=qdr:d
-OPENAI_MODEL=gpt-4.1
+OPENAI_MODEL=gpt-6-luna
 ELEVENLABS_MODEL=eleven_multilingual_v2
 AUDIO_FORMAT=mp3_44100_128
 ```
@@ -90,7 +90,7 @@ All configuration is managed through environment variables with sensible default
 | `TELEGRAM_CHAT_ID` | Telegram chat ID | Yes | - |
 | `SEARCH_LIMIT` | Number of search results | No | 5 |
 | `SEARCH_TIME_FILTER` | Time filter for search | No | qdr:d |
-| `OPENAI_MODEL` | OpenAI model to use | No | gpt-4.1 |
+| `OPENAI_MODEL` | OpenAI model to use (`gpt-4.1` shuts down 2027-01-14) | No | gpt-6-luna |
 | `ELEVENLABS_MODEL` | ElevenLabs model | No | eleven_multilingual_v2 |
 | `AUDIO_FORMAT` | Audio output format | No | mp3_44100_128 |
 

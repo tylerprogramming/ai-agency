@@ -5,8 +5,8 @@ google-auth
 google-auth-oauthlib
 google-api-python-client
 openai
-crewai
-crewai-tools
+crewai>=1.15,<2
+crewai-tools>=1.15,<2
 apscheduler
 pytz
 requests

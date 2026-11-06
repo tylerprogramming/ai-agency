@@ -24,7 +24,7 @@ class AIService:
             locations, and other event details from casual descriptions. You always use proper timezone 
             handling and make reasonable assumptions for missing information.""",
             verbose=True,
-            llm=f"openai/gpt-4.1",
+            llm=f"openai/gpt-5.4-mini",
             max_iter=3,
             allow_code_execution=False
         )

@@ -4,17 +4,22 @@ Automatically processes MP4/MOV files with Submagic when they're added to a watc
 
 ## 🚀 Quick Start
 
-1. **Create the watch folder:**
+1. **Install the dependencies (Python 3.10-3.13):**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Create the watch folder:**
    ```bash
    mkdir -p /Users/tylerreed/files_to_submagic
    ```
 
-2. **Make sure you have your Submagic API key in `.env`:**
+3. **Make sure you have your Submagic API key in `.env`:**
    ```bash
    echo "SUBMAGIC_API_KEY=your_api_key_here" >> .env
    ```
 
-3. **Start the monitor:**
+4. **Start the monitor:**
    ```bash
    python start_monitor.py
    ```

@@ -1,3 +1,13 @@
+# 03_reels_editor: Python 3.10-3.13. Install: pip install -r requirements.txt
+
+# File monitor (start_monitor.py -> file_monitor.py -> submagic_flow)
 watchdog
 requests
 python-dotenv
+# submagic_flow/main.py imports crewai.flow; same range as submagic_flow/pyproject.toml
+crewai>=0.152.0,<1.0.0
+
+# Sample Composio webhook server (fastapi_server.py)
+fastapi
+uvicorn
+pydantic-settings>=2,<3
